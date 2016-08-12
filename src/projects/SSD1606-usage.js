@@ -59,7 +59,7 @@ E.on('init', function() {
         display.g.setRotation(1);
         // from here it shows the normal usage
         // set color black for subsequent uses
-        display.g.setColor(0x00);
+        //display.g.setColor(0x00);
         // set fontsize, see Graphics and Fonts modules for further options
         //display.g.setFontVector(20);
         //display.g.drawString('Hello World!', 22, 22);
@@ -73,10 +73,10 @@ E.on('init', function() {
           // again just a comfort function
           display.off();
         });
-      },
+      }
       // clearScreenColor is optional, but prevents e-paper ghosting
       // shadow of an image may be visible after refreshing (only) parts of the screen
-      { clearScreenColor: 0x00 }
+      //{ clearScreenColor: 0x00 }
     );
   });
 });
