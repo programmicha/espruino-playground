@@ -107,6 +107,13 @@ SSD1606.prototype.hwReset = function(callback) {
  * <ol>
  * <li>Exit deep sleep mode</li>
  * <li>Set data entry mode -  0000 0011 means AM=0 means 'x-mode' and ID=11 means 'x:increment and y:increment'</li>
+ * <li>Set panel config, 179+1 horizontal pixels and GD=SM=TB=0.</li>
+ * <li>Set VGH/VGL</li>
+ * <li>Set VSH/VSL</li>
+ * <li>Set dummy line pulse period.</li>
+ * <li>Set gate line width.</li>
+ * <li>Write vcom reg.</li>
+ * <li>Select border waveform.</li>
  * <li>Set RAM X start and end addresses</li>
  * <li>Set RAM Y start and end addresses</li>
  * <li>Set RAM X counter</li>
