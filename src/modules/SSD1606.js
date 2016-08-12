@@ -74,6 +74,9 @@ function SSD1606(config) {
   } else {
     this.hwResetTimeOut = 100;
   }
+  if(config.setPor){
+    this.setPor = true;
+  }
 }
 /**
  * Power on the display, using the provided powerPin.
@@ -101,24 +104,43 @@ SSD1606.prototype.hwReset = function(callback) {
   return setTimeout(callback, this.hwResetTimeOut); // is that even needed?
 };
 /**
+ * Power on reset - sets all values which according to specification are set after reset.
+ * <ul>
+ * <li>Driver Output control - set panel config, 179+1 horizontal pixels and GD=SM=TB=0.</li>
+ * <li>Gate Driving voltage Control - VGH / VGL</li>
+ * <li>Source Driving voltage Control - VSH / VSL</li>
+ * <li>Set dummy line period.</li>
+ * <li>Set gate line width.</li>
+ * <li>Write vcom register.</li>
+ * <li>Border waveform.</li>
+ * <li>Set data entry mode -  0000 0011 means AM=0 means 'x-mode' and ID=11 means 'x:increment and y:increment'</li>
+ * <li>Set RAM X counter</li>
+ * <li>Set RAM Y counter</li>
+ * <li>Set booster feedback selection</li>
+ * </ul>
+ */
+SSD1606.prototype.por = function() {
+  this.scd(0x01, 0xB3);
+  this.scd(0x03, 0xEA);
+  this.scd(0x04, 0x0A);
+  this.scd(0x3A, 0x04);
+  this.scd(0x3B, 0x08);
+  this.scd(0x2C, 0xA0); // meaning of this value is not available in specification
+  this.scd(0x3C, 0x73);
+  this.scd(0x11, 0x03);
+  this.scd(0x4E, 0x00);
+  this.scd(0x4F, 0x00);
+  this.scd(0xF0, 0x1F);
+};
+/**
  * Initialize display.
  * If set it uses the provided bs1Pin to configure the SPI mode between to use 4 lines.
  * Initializing sequence:
  * <ol>
  * <li>Exit deep sleep mode</li>
- * <li>Set data entry mode -  0000 0011 means AM=0 means 'x-mode' and ID=11 means 'x:increment and y:increment'</li>
- * <li>Set panel config, 179+1 horizontal pixels and GD=SM=TB=0.</li>
- * <li>Set VGH/VGL</li>
- * <li>Set VSH/VSL</li>
- * <li>Set dummy line pulse period.</li>
- * <li>Set gate line width.</li>
- * <li>Write vcom reg.</li>
- * <li>Select border waveform.</li>
+ * <li>(optional) set power on reset values.</li>
  * <li>Set RAM X start and end addresses</li>
  * <li>Set RAM Y start and end addresses</li>
- * <li>Set RAM X counter</li>
- * <li>Set RAM Y counter</li>
- * <li>Set booster feedback selection</li>
  * <li>Set display update sequence option - enable sequence: clk -> CP</li>
  * <li>Write LUT register</li>
  * <li>Write VCOM register</li>
@@ -133,21 +155,11 @@ SSD1606.prototype.init = function(callback, options) {
     digitalWrite(this.bs1Pin, LOW);
   }
   this.scd(0x10, 0x00);
-  this.scd(0x01, 0xB3);
-  this.psd();
-  this.sd(0x00);
-  this.scd(0x03, 0xEA);
-  this.scd(0x04, 0x0A);
-  this.scd(0x3A, 0x04);
-  this.scd(0x3A, 0x08);
-  this.scd(0x2C, 0xA0);
-  this.scd(0x3C, 0x63);
-  this.scd(0x11, 0x03);
+  if(this.setPor) {
+    this.por();
+  }
   this.scd(0x44,[this.display.ramXStartAddress, this.display.ramXEndAddress]);
   this.scd(0x45,[this.display.ramYStartAddress, this.display.ramYEndAddress]);
-  this.scd(0x4E, 0x00);
-  this.scd(0x4F, 0x00);
-  this.scd(0xF0, 0x1F);
   this.scd(0x22, 0xC0);
   this.scd(0x32, this.display.lutRegisterData);
   this.scd(0x2C, 0xA0);
