@@ -24,11 +24,11 @@ function drawingFun(display) {
   display.g.setColor(0x00);
   display.g.fillPoly([30,72,50,52,70,72,80,60,95,50,120,72]);
 }
-// per default turn display off
-digitalWrite(A7, LOW);
-
 // run following code onInit
 E.on('init', function() {
+  // per default turn display off
+  digitalWrite(A7, LOW);
+  setInterval(function() {
   // SPI configuration
   var spi = SPI1;
   spi.setup({
@@ -44,7 +44,7 @@ E.on('init', function() {
     resetPin   : A8,
     busyPin    : A5,
     bs1Pin     : A6, // optional, but if not provided, you need to set the correct SPI mode 4-wire by yourself
-    powerPin   : A7  // optional, just do not use the on() or off() function if you do not provide it
+    powerPin   : A7 // optional, just do not use the on() or off() function if you do not provide it
   });
   // activate the power to run the display, just a comfort function, 
   // you can control the power by yourself as well
@@ -59,11 +59,12 @@ E.on('init', function() {
         display.g.setRotation(1);
         // from here it shows the normal usage
         // set color black for subsequent uses
-        //display.g.setColor(0x00);
+        display.g.setColor(0x00);
         // set fontsize, see Graphics and Fonts modules for further options
-        //display.g.setFontVector(20);
-        //display.g.drawString('Hello World!', 22, 22);
-        drawingFun(display);
+        display.g.setFontVector(20);
+        var date = new Date();
+        display.g.drawString(date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ':' + date.getMilliseconds(), 0, 22);
+        //drawingFun(display);
         // from here it shows the needed part
         // (needed) copy internal buffer to display buffer
         display.g.flip();
@@ -73,10 +74,12 @@ E.on('init', function() {
           // again just a comfort function
           display.off();
         });
-      }
+      },
       // clearScreenColor is optional, but prevents e-paper ghosting
       // shadow of an image may be visible after refreshing (only) parts of the screen
-      //{ clearScreenColor: 0x00 }
+      { clearScreenColor: 0x00 }
     );
   });
+  }, 20000);
+  setDeepSleep(1);
 });
